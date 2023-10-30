@@ -4,7 +4,7 @@ export default ({ url } = {}) => (
     <main>
       <div class="workers-logo"></div>
       <p>
-        Welcome! This is a demo of Preact being rendered using SSR with Vite.
+        Welcome This is a demo of Preact being rendered using SSR with Vite.
         The SSR render runs <i>in workerd</i>, which means it has access to all
         the usual Workers APIs, like <code>navigator.userAgent: </code>
         <code style={{ color: '#2196f3' }}>{navigator.userAgent}</code>

@@ -1,62 +1,29 @@
-import preact from '@preact/preset-vite';
-import { Miniflare, Log } from 'miniflare';
-import fs from 'fs';
-import path from 'path';
+import { Log, type WorkerOptions } from 'miniflare';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createMiniflareInstance } from './miniflare.js';
 
-class WranglerLog extends Log {
-  #warnedCompatibilityDateFallback = false;
+export function workerdSSR() {
+  const mf = createMiniflareInstance();
 
-  info(message) {
-    // Hide request logs for external Durable Objects proxy worker
-    super.info(message);
-  }
-  log(message) {
-    console.log(message);
-  }
-
-  warn(message) {
-    // Only log warning about requesting a compatibility date after the workerd
-    // binary's version once
-    if (message.startsWith('The latest compatibility date supported by')) {
-      if (this.#warnedCompatibilityDateFallback) return;
-      this.#warnedCompatibilityDateFallback = true;
-    }
-    super.warn(message);
-  }
-}
-
-const AsyncFunction = async function () {}.constructor;
-
-function miniflarePlugin() {
-  const mf = new Miniflare({
-    log: new WranglerLog(),
-    workers: [
-      {
-        name: 'worker',
-        compatibilityDate: '2023-07-01',
-        modules: [
-          {
-            contents: `
-              export default {
-                async fetch(request, env, ctx) {
-                  return new Response("")
-                }
-              }`,
-            type: 'ESModule',
-            path: 'index.js',
-          },
-        ],
-      },
-    ],
-  });
   return {
-    name: 'configure-server',
+    name: 'workerd-ssr',
     configureServer(server) {
       async function loadModule(name) {
         const transformed = await server.transformRequest(name, { ssr: true });
         return {
-          code: `async function anonymous(global,__vite_ssr_exports__,__vite_ssr_import_meta__,__vite_ssr_import__,__vite_ssr_dynamic_import__,__vite_ssr_exportAll__
-          ) {"use strict";${transformed.code}}`,
+          code: `
+          async function anonymous(
+            global,
+            __vite_ssr_exports__,
+            __vite_ssr_import_meta__,
+            __vite_ssr_import__,
+            __vite_ssr_dynamic_import__,
+            __vite_ssr_exportAll__
+          ) {
+            "use strict";
+            ${transformed.code}}
+          `,
           deps: transformed.deps,
         };
       }
@@ -83,14 +50,14 @@ function miniflarePlugin() {
             }
 
             // De-dupe modules
-            const modules = Object.entries(
+            const modules: [string, string][] = Object.entries(
               Object.fromEntries(
                 await crawlModuleGraph(serverEntry.deps, new Set())
               )
             );
 
             await mf.setOptions({
-              log: new WranglerLog(),
+              log: new Log(),
               workers: [
                 {
                   name: 'worker',
@@ -103,7 +70,6 @@ function miniflarePlugin() {
                   async function loader(n) {
                     const ssrModule = {}
                     const m = await import(n)
-                    
 
                     await m.anonymous({}, ssrModule, {}, loader, () => {}, () => {})
                     return ssrModule
@@ -132,7 +98,7 @@ function miniflarePlugin() {
                       contents: v,
                       path: k.slice(1),
                       type: 'ESModule',
-                    })),
+                    })) as Exclude<WorkerOptions['modules'], boolean>,
                   ],
                 },
               ],
@@ -161,7 +127,7 @@ function miniflarePlugin() {
 
           try {
             let template = fs.readFileSync(
-              path.resolve(__dirname, 'index.html'),
+              path.resolve('.', 'index.html'),
               'utf-8'
             );
 
@@ -190,19 +156,3 @@ function miniflarePlugin() {
     },
   };
 }
-/** @type {import('vite').UserConfig} */
-export default {
-  // config options
-  ssr: {
-    target: 'webworker',
-    noExternal: true,
-    optimizeDeps: {
-      include: ['preact', 'preact-render-to-string'],
-    },
-  },
-  plugins: [miniflarePlugin(), preact()],
-  build: {
-    minify: false,
-    ssrEmitAssets: true,
-  },
-};

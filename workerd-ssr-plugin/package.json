@@ -1,0 +1,21 @@
+{
+	"name": "workerd-ssr-plugin",
+	"version": "0.0.0",
+	"type": "module",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "esbuild --bundle --format=esm ./src/index.ts --platform=node --outfile=./dist/index.js --external:miniflare",
+		"build:watch": "npm run build -- --watch=forever"
+	},
+	"files": [
+		"dist"
+	],
+	"devDependencies": {
+		"@tsconfig/strictest": "^2.0.0",
+		"@types/node": "^20.8.9",
+		"esbuild": "^0.15.3",
+		"miniflare": "^3.20230918.0",
+		"tsconfig": "*",
+		"typescript": "^5.0.4"
+	}
+}
