@@ -2,10 +2,10 @@
 	"$schema": "https://json.schemastore.org/tsconfig",
 	"compilerOptions": {
 		"target": "ES2022",
-		"module": "NodeNext",
+		"module": "ESNext",
 		"lib": ["ES2015"],
-		"moduleResolution": "NodeNext",
 		"resolveJsonModule": true,
+		"moduleResolution": "Bundler",
 		"checkJs": false,
 
 		"exactOptionalPropertyTypes": false,

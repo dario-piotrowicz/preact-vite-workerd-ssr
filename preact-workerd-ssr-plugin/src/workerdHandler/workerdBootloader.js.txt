@@ -12,7 +12,6 @@ export default {
     }
 }
 
-
 const __ourPrivateModuleRegistry__ = new Map();
 
 // create our own implementation
