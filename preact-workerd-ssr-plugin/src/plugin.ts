@@ -83,7 +83,7 @@ function createWorkerdHandler({
   // TODO: figure out how to get hold of Vite's server address
   // server.httpServer.address() is null, likely because the server hasn't started yet
   //console.log('address', config.server.httpServer.address())
-  const address = "http://localhost:4567";
+  const address = "http://localhost:5173";
 
   const bootloader = workerdBootloader
     .replace(/VITE_SERVER_ADDRESS/, address)
@@ -105,16 +105,20 @@ function createWorkerdHandler({
   const mf = createMiniflareInstance({script: bootloader, unsafeEvalBinding: "UNSAFE_EVAL"});
 
   // this could be in the future replaced with websockets
-  server.middlewares.use(async (request, resp, next) => {
-    if (!request.url.startsWith("__workerd_loader/")) {
+  server.middlewares.use(async (request, resp, next) => {  
+    if (!request.url.startsWith("/__workerd_loader/")) {
       next();
       return;
     }
 
     // the request is for the workerd loader so we need to handle it
-    const url = new URL(request.url);
+    const url = new URL(`http://localhost${request.url}`);
     const moduleId = url.searchParams.get("moduleId");
-    const moduleCode = server.transformRequest(moduleId);
+
+    const transformed = `function render(url) {\n  return \`<h1>TEST (\${url}) (moduleId = "${moduleId}")</h1>\`;\n}\nObject.defineProperty(__vite_ssr_exports__, "render", { enumerable: true, configurable: true, get(){ return render }});`
+    const moduleCode = transformed;
+
+    // const moduleCode = server.transformRequest(moduleId);
     resp.writeHead(200, { "Content-Type": "text/plain" });
     resp.end(moduleCode);
   });

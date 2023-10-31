@@ -2,9 +2,6 @@ let evalBinding = null;
 
 export default {
     async fetch(request, env, context) {
-        const text = env.UNSAFE_EVAL.eval('"hello from" + "workerdBootloader! (with eval!)"')
-        return new Response(text);
-
         evalBinding = env.UNSAFE_EVAL;
 
         const entryPoint = await __vite_ssr_dynamic_import__("WORKERD_APP_ENTRYPOINT");
@@ -22,36 +19,34 @@ async function __vite_ssr_import__(moduleId) {
         return __ourPrivateModuleRegistry__.get(moduleId);
     }
 
+    let module = Object.create(null);
 
-    const module = Object.create(null);
-
-    // copy from Vite's node implementation?
-    const __vite_ssr_exports__= 'something';
-    // copy from Vite's node implementation?
-    const __vite_ssr_exportAll__ = 'something';
-    //
-    const __vite_ssr_import_meta__ = 'something'
-
+    // // copy from Vite's node implementation?
+    // const __vite_ssr_exports__= 'something';
+    // // copy from Vite's node implementation?
+    // const __vite_ssr_exportAll__ = 'something';
+    // //
+    // const __vite_ssr_import_meta__ = 'something'
 
     // go back to Vite and request the code for the module (via transformRequest)
-    const transformed = await (await fetch(`VITE_SERVER_ADDRESS/___workerd_loader/?moduleId=${moduleId}`)).text();
-    
-    //eval(code)
+    const transformed = await (await fetch(`VITE_SERVER_ADDRESS/__workerd_loader/?moduleId=${moduleId}`)).text();
+
     const context = {
-        __vite_ssr_exports__,
-        __vite_ssr_exportAll__,
-        __vite_ssr_import_meta__,
-        __vite_ssr_import__,
-        __vite_ssr_dynamic_import__,
-        
+        __vite_ssr_exports__: {},
+        // __vite_ssr_exportAll__,
+        // __vite_ssr_import_meta__,
+        // __vite_ssr_import__,
+        // __vite_ssr_dynamic_import__,
     };
 
-    const codeDefinition = `'use strict'; return async (${Object.keys(context).join(",")})=>{{`;
-    const code = `${codeDefinition}${transformed}
-}}`;
+    const codeDefinition = `'use strict'; return async (${Object.keys(context).join(",")})=>{`;
+    const code = `${codeDefinition}${transformed}}`;
 
     // eval the code, register all exports with `module` and trigger recursive imports
-    evalBinding.newFunction(code)()(context);
+    const fn = evalBinding.newFunction(code)();
+    await fn(...Object.values(context));
+
+    Object.assign(module, context.__vite_ssr_exports__);
 
     // `module` should now have all the exports registered on it
     __ourPrivateModuleRegistry__.set(moduleId, module)
