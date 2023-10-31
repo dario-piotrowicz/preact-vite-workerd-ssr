@@ -15,13 +15,14 @@ export function createWorkerdHandler({
 }) {
   console.log("create handler");
 
-  // TODO: figure out how to get hold of Vite's server address
-  // server.httpServer.address() is null, likely because the server hasn't started yet
-  //console.log('address', config.server.httpServer.address())
-  const address = "http://localhost:5173";
+  const viteHttpServerAddress = server.httpServer.address();
+  const viteServerAddress =
+    typeof viteHttpServerAddress === "string"
+      ? viteHttpServerAddress
+      : `http://${viteHttpServerAddress.address}:${viteHttpServerAddress.port}`;
 
   const bootloader = workerdBootloader
-    .replace(/VITE_SERVER_ADDRESS/, address)
+    .replace(/VITE_SERVER_ADDRESS/, viteServerAddress)
     .replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
     .replace(/GENERATE_RESPONSE/, frameworkRequestHandlingJs);
 
