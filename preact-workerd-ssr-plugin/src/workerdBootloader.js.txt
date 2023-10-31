@@ -24,8 +24,6 @@ async function __vite_ssr_import__(moduleId) {
     let module = Object.create(null);
 
     // // copy from Vite's node implementation?
-    // const __vite_ssr_exports__= 'something';
-    // // copy from Vite's node implementation?
     // const __vite_ssr_exportAll__ = 'something';
     // //
     // const __vite_ssr_import_meta__ = 'something'
