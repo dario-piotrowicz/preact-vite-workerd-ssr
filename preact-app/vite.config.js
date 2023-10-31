@@ -1,5 +1,5 @@
 import preact from '@preact/preset-vite';
-import { workerdSSR } from 'workerd-ssr-plugin';
+import { preactWorkerdSSR } from 'preact-workerd-ssr-plugin';
 
 console.log('vite.config.js');
 /** @type {import('vite').UserConfig} */
@@ -12,7 +12,7 @@ export default {
       include: ['preact', 'preact-render-to-string'],
     },
   },
-  plugins: [preact(), workerdSSR()],
+  plugins: [preact(), preactWorkerdSSR()],
   build: {
     minify: false,
     ssrEmitAssets: true,

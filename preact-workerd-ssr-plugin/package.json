@@ -1,5 +1,5 @@
 {
-	"name": "workerd-ssr-plugin",
+	"name": "preact-workerd-ssr-plugin",
 	"version": "0.0.0",
 	"type": "module",
 	"main": "dist/index.js",

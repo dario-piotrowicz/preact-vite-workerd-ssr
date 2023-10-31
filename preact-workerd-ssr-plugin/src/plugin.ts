@@ -1,13 +1,14 @@
 import fs from "node:fs";
 import path from "node:path";
-import http, { ClientRequest, IncomingMessage } from "node:http";
+import { IncomingMessage } from "node:http";
 import { createMiniflareInstance } from "./miniflare.js";
 import { type ViteDevServer } from "vite";
+//@ts-ignore
 import workerdBootloader from "./workerdBootloader.js.txt";
 
-export function workerdSSR() {
+export function preactWorkerdSSR() {
   return {
-    name: "workerd-ssr",
+    name: "preact-workerd-ssr",
     configureServer(server: ViteDevServer) {
       return () => {
         const handler = createWorkerdHandler({
@@ -30,11 +31,11 @@ export function workerdSSR() {
 
             // dispatch request to miniflare
             const ssrResponse = await handler(req);
-            
-            
+
             // preact specific
-            if (ssrResponse.statusCode !== 200) {
-              res.statusCode = ssrResponse.statusCode;
+            if (ssrResponse.status !== 200) {
+              res.statusCode = ssrResponse.status;
+              res.statusMessage = ssrResponse.statusText;
               res.end(await ssrResponse.text());
             }
 

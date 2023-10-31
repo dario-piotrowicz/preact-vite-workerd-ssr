@@ -48,7 +48,7 @@ async function __vite_ssr_import__(moduleId) {
 }}`;
 
     // eval the code, register all exports with `module` and trigger recursive imports
-    evalBiding.newFunction(code)()(context);
+    evalBinding.newFunction(code)()(context);
 
     // `module` should now have all the exports registered on it
     __ourPrivateModuleRegistry__.set(moduleId, module)
