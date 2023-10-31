@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { IncomingMessage, ServerResponse } from "node:http";
+import { IncomingMessage } from "node:http";
 import { createMiniflareInstance } from "./miniflare.js";
 import { type ViteDevServer } from "vite";
 //@ts-ignore
@@ -105,7 +105,7 @@ function createWorkerdHandler({
   const mf = createMiniflareInstance({script: bootloader, unsafeEvalBinding: "UNSAFE_EVAL"});
 
   // this could be in the future replaced with websockets
-  server.middlewares.use(async (request, resp, next) => {  
+  server.middlewares.use(async (request, resp, next) => {
     if (!request.url.startsWith("/__workerd_loader/")) {
       next();
       return;
@@ -115,10 +115,9 @@ function createWorkerdHandler({
     const url = new URL(`http://localhost${request.url}`);
     const moduleId = url.searchParams.get("moduleId");
 
-    const transformed = `function render(url) {\n  return \`<h1>TEST (\${url}) (moduleId = "${moduleId}")</h1>\`;\n}\nObject.defineProperty(__vite_ssr_exports__, "render", { enumerable: true, configurable: true, get(){ return render }});`
-    const moduleCode = transformed;
-
-    // const moduleCode = server.transformRequest(moduleId);
+    const moduleCode = (await server.transformRequest(moduleId, {
+      ssr: true
+    })).code;
     resp.writeHead(200, { "Content-Type": "text/plain" });
     resp.end(moduleCode);
   });

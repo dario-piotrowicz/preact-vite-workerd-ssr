@@ -1,5 +1,7 @@
 let evalBinding = null;
 
+globalThis.navigator = {};
+
 export default {
     async fetch(request, env, context) {
         evalBinding = env.UNSAFE_EVAL;
@@ -35,12 +37,14 @@ async function __vite_ssr_import__(moduleId) {
         __vite_ssr_exports__: {},
         // __vite_ssr_exportAll__,
         // __vite_ssr_import_meta__,
-        // __vite_ssr_import__,
-        // __vite_ssr_dynamic_import__,
+        __vite_ssr_import__,
+        __vite_ssr_dynamic_import__,
     };
 
     const codeDefinition = `'use strict'; return async (${Object.keys(context).join(",")})=>{`;
     const code = `${codeDefinition}${transformed}}`;
+
+    module.code = code;
 
     // eval the code, register all exports with `module` and trigger recursive imports
     const fn = evalBinding.newFunction(code)();
