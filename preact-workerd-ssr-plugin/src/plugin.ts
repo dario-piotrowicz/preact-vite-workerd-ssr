@@ -13,15 +13,22 @@ export function preactWorkerdSSR() {
       return () => {
         const handler = createWorkerdHandler({
           entrypoint: "./entry-server.jsx",
-          server
+          server,
         });
 
         server.middlewares.use(async (req, res, next) => {
-          const notImplemented = true;
-          if(notImplemented) {
+          if (req.originalUrl !== "/") {
+            // the request is not for the root nor the workerd loader, so
+            // it's not for us to handle
+
+            // NOTE: this works fine with preact, but in general we want to handle all
+            // incoming requests, we need to find a way to discern which requests we need
+            // to handle and which we don't (for example we never want to intercept static
+            // asset requests!)
             next();
             return;
           }
+
           console.time("run SSR");
 
           const url = req.originalUrl;
@@ -42,6 +49,7 @@ export function preactWorkerdSSR() {
               res.statusCode = ssrResponse.status;
               res.statusMessage = ssrResponse.statusText;
               res.end(await ssrResponse.text());
+              return;
             }
 
             const body = await ssrResponse.text();
@@ -63,15 +71,14 @@ export function preactWorkerdSSR() {
   };
 }
 
-
 function createWorkerdHandler({
   entrypoint,
-  server
+  server,
 }: {
-  entrypoint: string,
-  server: ViteDevServer,
+  entrypoint: string;
+  server: ViteDevServer;
 }) {
-  console.log('create handler')
+  console.log("create handler");
 
   // TODO: figure out how to get hold of Vite's server address
   // server.httpServer.address() is null, likely because the server hasn't started yet
@@ -81,13 +88,16 @@ function createWorkerdHandler({
   const bootloader = workerdBootloader
     .replace(/VITE_SERVER_ADDRESS/, address)
     .replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
-    .replace(/GENERATE_RESPONSE/, `
+    .replace(
+      /GENERATE_RESPONSE/,
+      `
             // preact specific bits
             const url = request.url;
             const renderedString = entryPoint.render(url);
 
             return new Response(renderedString);
-            `);
+            `
+    );
 
   // create miniflare instance
   // load it with module loader code and import to the entry point
@@ -96,23 +106,30 @@ function createWorkerdHandler({
 
   // this could be in the future replaced with websockets
   server.middlewares.use(async (request, resp, next) => {
-    if(!request.url.startsWith('__workerd_loader/')) {
+    if (!request.url.startsWith("__workerd_loader/")) {
       next();
       return;
     }
 
     // the request is for the workerd loader so we need to handle it
     const url = new URL(request.url);
-    const moduleId = url.searchParams.get('moduleId');
+    const moduleId = url.searchParams.get("moduleId");
     const moduleCode = server.transformRequest(moduleId);
-    resp.writeHead(200, { 'Content-Type': 'text/plain' });
+    resp.writeHead(200, { "Content-Type": "text/plain" });
     resp.end(moduleCode);
   });
 
   return async function workerdRequestHandler(request: IncomingMessage) {
+    let url = request.url.startsWith("/")
+      ? `http://localhost${request.url}`
+      : request.url;
+
     // TODO: we should support POST requests with body as well
-    //       for that we need something along the lines of 
+    //       for that we need something along the lines of
     //       https://github.com/sveltejs/kit/blob/master/packages/kit/src/exports/node/index.js#L8
-    return mf.dispatchFetch(request.url, {headers: request.headers, method: request.method || 'GET'});
-  }
+    return mf.dispatchFetch(url, {
+      headers: request.headers,
+      method: request.method || "GET",
+    });
+  };
 }

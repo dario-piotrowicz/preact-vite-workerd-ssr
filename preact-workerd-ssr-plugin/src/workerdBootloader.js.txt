@@ -2,6 +2,7 @@ let evalBinding = null;
 
 export default {
     async fetch(request, env, context) {
+        return new Response('hello from workerdBootloader!');
         evalBinding = env.ourUnsafeEval;
 
         const entryPoint = await __vite_ssr_dynamic_import__("WORKERD_APP_ENTRYPOINT");
