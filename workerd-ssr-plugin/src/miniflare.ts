@@ -1,6 +1,6 @@
 import { Log, Miniflare } from "miniflare";
 
-export function createMiniflareInstance() {
+export function createMiniflareInstance(options): Miniflare {
     return new Miniflare({
       log: new Log(),
       workers: [
@@ -9,16 +9,12 @@ export function createMiniflareInstance() {
           compatibilityDate: '2023-07-01',
           modules: [
             {
-              contents: `
-                export default {
-                  async fetch(request, env, ctx) {
-                    return new Response("")
-                  }
-                }`,
+              contents: options.script,
               type: 'ESModule',
               path: 'index.js',
             },
           ],
+          //unsafeEval: options.unsafeEval
         },
       ],
     });

@@ -1,6 +1,7 @@
 import preact from '@preact/preset-vite';
 import { workerdSSR } from 'workerd-ssr-plugin';
 
+console.log('vite.config.js');
 /** @type {import('vite').UserConfig} */
 export default {
   // config options
