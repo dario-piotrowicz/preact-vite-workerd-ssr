@@ -102,7 +102,7 @@ function createWorkerdHandler({
   // create miniflare instance
   // load it with module loader code and import to the entry point
 
-  const mf = createMiniflareInstance({script: bootloader, unsafeEval: "ourUnsafeEval"});
+  const mf = createMiniflareInstance({script: bootloader, unsafeEvalBinding: "UNSAFE_EVAL"});
 
   // this could be in the future replaced with websockets
   server.middlewares.use(async (request, resp, next) => {

@@ -2,15 +2,15 @@ import { Log, Miniflare } from "miniflare";
 
 export function createMiniflareInstance({
   script,
-  unsafeEval,
+  unsafeEvalBinding,
 }: {
   script: string;
-  unsafeEval: string;
+  unsafeEvalBinding: string;
 }): Miniflare {
-  // TODO: pass unsafeEval to miniflare
   return new Miniflare({
     log: new Log(),
     modules: true,
     script,
+    unsafeEvalBinding
   });
 }
