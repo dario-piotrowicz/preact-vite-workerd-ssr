@@ -1,13 +1,17 @@
 {
-  "name": "preact-vite-workerd-ssr",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "build": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --filter preact-app --sequential build",
-    "build:watch": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --parallel build:watch",
-    "build:types": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --sequential build:types"
-  },
-  "keywords": [],
-  "author": ""
+	"name": "preact-vite-workerd-ssr",
+	"version": "1.0.0",
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"prettify": "prettier . --write --ignore-unknown",
+		"build": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --filter preact-app --sequential build",
+		"build:watch": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --parallel build:watch",
+		"build:types": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --sequential build:types"
+	},
+	"keywords": [],
+	"author": "",
+	"devDependencies": {
+		"prettier": "^3.0.3"
+	}
 }

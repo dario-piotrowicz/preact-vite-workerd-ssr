@@ -1,14 +1,14 @@
 import { Log, Miniflare } from "miniflare";
 
 export function createMiniflareInstance({
-  script,
+	script,
 }: {
-  script: string;
+	script: string;
 }): Miniflare {
-  return new Miniflare({
-    log: new Log(),
-    modules: true,
-    script,
-    unsafeEvalBinding: "UNSAFE_EVAL"
-  });
+	return new Miniflare({
+		log: new Log(),
+		modules: true,
+		script,
+		unsafeEvalBinding: "UNSAFE_EVAL",
+	});
 }
