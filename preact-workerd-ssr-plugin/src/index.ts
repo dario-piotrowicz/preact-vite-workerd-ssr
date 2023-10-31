@@ -1,1 +1,1 @@
-export { preactWorkerdSSR } from "./plugin.js";
+export { preactWorkerdSSR } from "./plugin";
