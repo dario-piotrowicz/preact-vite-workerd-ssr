@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { IncomingMessage } from "node:http";
+import { IncomingMessage, ServerResponse } from "node:http";
 import { createMiniflareInstance } from "./miniflare.js";
 import { type ViteDevServer } from "vite";
 //@ts-ignore
@@ -12,11 +12,16 @@ export function preactWorkerdSSR() {
     configureServer(server: ViteDevServer) {
       return () => {
         const handler = createWorkerdHandler({
-          entry: "./entry-server.jsx",
+          entrypoint: "./entry-server.jsx",
           server
         });
 
         server.middlewares.use(async (req, res, next) => {
+          const notImplemented = true;
+          if(notImplemented) {
+            next();
+            return;
+          }
           console.time("run SSR");
 
           const url = req.originalUrl;
@@ -59,7 +64,13 @@ export function preactWorkerdSSR() {
 }
 
 
-function createWorkerdHandler(config) {
+function createWorkerdHandler({
+  entrypoint,
+  server
+}: {
+  entrypoint: string,
+  server: ViteDevServer,
+}) {
   console.log('create handler')
 
   // TODO: figure out how to get hold of Vite's server address
@@ -69,7 +80,7 @@ function createWorkerdHandler(config) {
 
   const bootloader = workerdBootloader
     .replace(/VITE_SERVER_ADDRESS/, address)
-    .replace(/WORKERD_APP_ENTRYPOINT/, config.entry)
+    .replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
     .replace(/GENERATE_RESPONSE/, `
             // preact specific bits
             const url = request.url;
@@ -84,17 +95,20 @@ function createWorkerdHandler(config) {
   const mf = createMiniflareInstance({script: bootloader, unsafeEval: "ourUnsafeEval"});
 
   // this could be in the future replaced with websockets
-  config.server.middlewares.use(async (request, resp, next) => {
-    if (request.url.startWith('___workerd_loader/')) {
-      const url = new URL(request.url);
-      const moduleId = url.searchParams.get('moduleId');
-      const moduleCode = config.server.transformRequest(moduleId);
-       resp.writeHead(200, { 'Content-Type': 'text/plain' });
-       resp.end(moduleCode);
+  server.middlewares.use(async (request, resp, next) => {
+    if(!request.url.startsWith('__workerd_loader/')) {
+      next();
+      return;
     }
+
+    // the request is for the workerd loader so we need to handle it
+    const url = new URL(request.url);
+    const moduleId = url.searchParams.get('moduleId');
+    const moduleCode = server.transformRequest(moduleId);
+    resp.writeHead(200, { 'Content-Type': 'text/plain' });
+    resp.end(moduleCode);
   });
 
-  
   return async function workerdRequestHandler(request: IncomingMessage) {
     // TODO: we should support POST requests with body as well
     //       for that we need something along the lines of 
