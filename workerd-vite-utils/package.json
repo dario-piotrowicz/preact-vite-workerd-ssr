@@ -1,5 +1,5 @@
 {
-	"name": "preact-workerd-ssr-plugin",
+	"name": "workerd-vite-utils",
 	"version": "0.0.0",
 	"type": "module",
 	"main": "dist/index.js",
@@ -12,7 +12,6 @@
 		"dist"
 	],
 	"dependencies": {
-		"workerd-vite-utils": "workspace:*",
 		"miniflare": "/Users/dario/Repos/miniflare/packages/miniflare"
 	},
 	"devDependencies": {

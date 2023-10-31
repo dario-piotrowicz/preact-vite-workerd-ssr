@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { type ViteDevServer } from "vite";
-import { createWorkerdHandler } from 'workerd-vite-utils';
+import { createWorkerdHandler } from ".";
 
 export function preactWorkerdSSR() {
   return {
