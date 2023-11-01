@@ -1,0 +1,25 @@
+{
+	"name": "workerd-vite-utils",
+	"version": "0.0.0",
+	"type": "module",
+	"main": "dist/index.js",
+	"scripts": {
+		"build": "esbuild --bundle --format=esm ./src/index.ts --platform=node --outfile=./dist/index.js --external:miniflare",
+		"build:watch": "npm run build -- --watch=forever",
+		"build:types": "tsc --emitDeclarationOnly --outDir ./dist"
+	},
+	"files": [
+		"dist"
+	],
+	"dependencies": {
+		"miniflare": "/Users/dario/Repos/miniflare/packages/miniflare"
+	},
+	"devDependencies": {
+		"@tsconfig/strictest": "^2.0.0",
+		"@types/node": "^20.8.9",
+		"esbuild": "^0.15.3",
+		"tsconfig": "*",
+		"typescript": "^5.0.4",
+		"vite": "^4.4.0"
+	}
+}

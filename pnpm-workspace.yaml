@@ -1,3 +1,4 @@
 packages:
-  - 'preact-app'
-  - 'workerd-ssr-plugin'
+  - "preact-app"
+  - "preact-workerd-ssr-plugin"
+  - "workerd-vite-utils"
