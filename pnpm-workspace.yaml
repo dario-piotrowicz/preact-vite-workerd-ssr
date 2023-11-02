@@ -1,4 +1,5 @@
 packages:
   - "preact-app"
+  - "qwik-app"
   - "preact-workerd-ssr-plugin"
   - "workerd-vite-utils"
