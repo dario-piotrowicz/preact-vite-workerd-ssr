@@ -1,44 +1,26 @@
 import { IncomingMessage } from "http";
 import { ViteDevServer } from "vite";
-import { createMiniflareInstance } from "./miniflare.js";
-//@ts-ignore
-import workerdBootloader from "./workerdBootloader.js.txt";
+import { instantiateMiniflare } from "./miniflare.js";
+
 import type { Miniflare } from "miniflare";
 
-export function createWorkerdHandler({
-	entrypoint,
-	server,
-	frameworkRequestHandlingJs,
-}: {
+export function createWorkerdHandler(opts: {
 	entrypoint: string;
 	server: ViteDevServer;
 	frameworkRequestHandlingJs: string;
 }) {
+	const { server } = opts;
 	console.log("create handler");
 
 	let mf: Miniflare | null;
 
-	server.httpServer.once("listening", () => {
-		const viteHttpServerAddress = server.httpServer.address();
-		const viteServerAddress =
-			typeof viteHttpServerAddress === "string"
-				? viteHttpServerAddress
-				: `http://${
-						/^:*$/.test(viteHttpServerAddress.address)
-							? "localhost"
-							: viteHttpServerAddress.address
-				  }:${viteHttpServerAddress.port}`;
-
-		const bootloader = workerdBootloader
-			.replace(/VITE_SERVER_ADDRESS/, viteServerAddress)
-			.replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
-			.replace(/GENERATE_RESPONSE/, frameworkRequestHandlingJs);
-
-		// create miniflare instance
-		// load it with module loader code and import to the entry point
-
-		mf = createMiniflareInstance({ script: bootloader });
-	});
+	if(server.httpServer.listening) {
+		mf = instantiateMiniflare(opts);
+	} else {
+		server.httpServer.once('listening', () => {
+			mf = instantiateMiniflare(opts);
+		})
+	}
 
 	// this could be in the future replaced with websockets
 	server.middlewares.use(async (request, resp, next) => {

@@ -8,7 +8,6 @@ export function preactWorkerdSSR() {
 		name: "preact-workerd-ssr",
 		configureServer(server: ViteDevServer) {
 			return () => {
-				server.httpServer.once("listening", () => {
 					const handler = createWorkerdHandler({
 						entrypoint: "./entry-server.jsx",
 						server,
@@ -68,7 +67,6 @@ export function preactWorkerdSSR() {
 							console.timeEnd("run SSR");
 						}
 					});
-				});
 			};
 		},
 	};
