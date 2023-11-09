@@ -46,7 +46,10 @@ async function __vite_ssr_import__(moduleId) {
 	};
 
 	const codeDefinition = `'use strict'; return async (${Object.keys(context).join(",")})=>{`;
-	const code = `${codeDefinition}${transformed}}`;
+	const code = `
+		${codeDefinition}
+		${transformed}
+	}`;
 
 	// eval the code, register all exports with `module` and trigger recursive imports
 
