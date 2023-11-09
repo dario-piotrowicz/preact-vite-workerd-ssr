@@ -46,13 +46,22 @@ export function createWorkerdHandler({
 		// searchParams.get strips "+" characters which affects module resolution
 		const moduleId = url.searchParams.get("moduleId").replace(" ", "+");
 
-		console.log("final module id: ", moduleId);
-
 		const moduleCode = (
 			await server.transformRequest(moduleId, {
 				ssr: true,
 			})
 		).code;
+
+		console.log("resolved: " + moduleId);
+		// if (/createComponent\b/.test(moduleCode)) {
+		// console.log("found `createComponent` call in: " + moduleId);
+		// debugger;
+		// }
+
+		// if (moduleId.includes("StartServer.tsx")) {
+		// 	console.log(moduleCode);
+		// }
+
 		resp.writeHead(200, { "Content-Type": "text/plain" });
 		resp.end(moduleCode);
 	});

@@ -10,5 +10,6 @@ export function createMiniflareInstance({
 		modules: true,
 		script,
 		unsafeEvalBinding: "UNSAFE_EVAL",
+		inspectorPort: 9225,
 	});
 }
