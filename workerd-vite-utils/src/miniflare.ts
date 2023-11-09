@@ -17,7 +17,7 @@ export function instantiateMiniflare({
 		typeof viteHttpServerAddress === "string"
 			? viteHttpServerAddress
 			: `http://${
-					/^:*$/.test(viteHttpServerAddress.address)
+					/:/.test(viteHttpServerAddress.address)
 						? "localhost"
 						: viteHttpServerAddress.address
 				}:${viteHttpServerAddress.port}`;
