@@ -2,9 +2,17 @@
 
 Fork the following github repo branch: https://github.com/dario-piotrowicz/qwik/tree/workerd-ssr
 
-Build the vite qwik code with `pnpm build.vite`
+Update qwik package.json in the following way:
 
-Here the package.json in the following way:
+```diff
+-    "workerd-vite-utils": "/Users/dario/Repos/my-repos/preact-vite-workerd-ssr/workerd-vite-utils"
++    "workerd-vite-utils": "<THE_ROOT_OF_THIS_MONOREPO>/workerd-vite-utils"
+```
+
+Build the vite qwik code with `pnpm build.vite` (or `pnpm build.full` to build everything)
+
+Here update the package.json in the following way:
+
 ```diff
 -    "@builder.io/qwik": "/Users/dario/Repos/qwik/packages/qwik",
 -    "@builder.io/qwik-city": "/Users/dario/Repos/qwik/packages/qwik-city",
