@@ -7,7 +7,6 @@ import {
 import { RouterHead } from "./components/router-head/router-head";
 
 import "./global.css";
-import DarioWIP from "./components/dario-wip/darioWIP";
 
 export default component$(() => {
   /**
@@ -26,7 +25,6 @@ export default component$(() => {
         <ServiceWorkerRegister />
       </head>
       <body lang="en">
-        <DarioWIP />
         <RouterOutlet />
       </body>
     </QwikCityProvider>
