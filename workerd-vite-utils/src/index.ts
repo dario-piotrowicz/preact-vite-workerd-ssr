@@ -13,13 +13,15 @@ export function createWorkerdHandler({
 	server: ViteDevServer;
 	frameworkRequestHandlingJs: string;
 }) {
-	console.log("create handler");
-
 	const viteHttpServerAddress = server.httpServer.address();
-	const viteServerAddress =
-		typeof viteHttpServerAddress === "string"
-			? viteHttpServerAddress
-			: `http://${viteHttpServerAddress.address}:${viteHttpServerAddress.port}`;
+
+	// const viteServerAddress =
+	// 	typeof viteHttpServerAddress === "string"
+	// 		? viteHttpServerAddress
+	// 		: `http://${viteHttpServerAddress.address}:${viteHttpServerAddress.port}`;
+
+	// HACK
+	const viteServerAddress = "http://localhost:3000";
 
 	const bootloader = workerdBootloader
 		.replace(/VITE_SERVER_ADDRESS/, viteServerAddress)
@@ -40,7 +42,11 @@ export function createWorkerdHandler({
 
 		// the request is for the workerd loader so we need to handle it
 		const url = new URL(`http://localhost${request.url}`);
-		const moduleId = url.searchParams.get("moduleId");
+
+		// searchParams.get strips "+" characters which affects module resolution
+		const moduleId = url.searchParams.get("moduleId").replace(" ", "+");
+
+		console.log("final module id: ", moduleId);
 
 		const moduleCode = (
 			await server.transformRequest(moduleId, {
