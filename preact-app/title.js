@@ -1,5 +1,5 @@
-import { appName } from './appName';
+import { getAppName } from './appName';
 
-export const title = `${appName}`;
+export const getTitle = () => `${getAppName()}`;
 
 export const framework = 'preact';

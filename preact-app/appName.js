@@ -1,3 +1,3 @@
 import { framework } from "./title";
 
-export const appName = `${framework}-app`;
+export const getAppName = () => `${framework}-app`;

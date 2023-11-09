@@ -22,6 +22,11 @@ async function __vite_ssr_import__(moduleId) {
 
     let moduleObject = Object.create(null);
 
+    // instead of adding the module to the registry once it has been fully initialized we
+    // set it as soon as we've generated the object (even if empty), we do this so that
+    // we can prevent circular dependencies from generating infinite loops
+    __ourPrivateModuleRegistry__.set(moduleId, moduleObject)
+
     // // copy from Vite's node implementation?
     // const __vite_ssr_exportAll__ = 'something';
     // //
@@ -47,8 +52,7 @@ async function __vite_ssr_import__(moduleId) {
     await fn(...Object.values(context));
     Object.assign(moduleObject, context.__vite_ssr_exports__);
 
-    // `module` should now have all the exports registered on it
-    __ourPrivateModuleRegistry__.set(moduleId, moduleObject)
+    // `module` should now have all the exports registered on it now
 
     return moduleObject;
 }

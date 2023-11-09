@@ -33,8 +33,6 @@ export function createWorkerdHandler(opts: {
 		const url = new URL(`http://localhost${request.url}`);
 		const moduleId = url.searchParams.get("moduleId");
 
-		console.log(`\x1b[46m workerd loading - ${moduleId} \x1b[0m`);
-
 		const moduleCode = (
 			await server.transformRequest(moduleId, {
 				ssr: true,
