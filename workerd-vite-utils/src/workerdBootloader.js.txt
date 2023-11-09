@@ -6,9 +6,11 @@ export default {
     async fetch(request, env, context) {
         evalBinding = env.UNSAFE_EVAL;
 
-        const entryPoint = await __vite_ssr_dynamic_import__("WORKERD_APP_ENTRYPOINT");
+        const entrypointModule = await __vite_ssr_dynamic_import__("WORKERD_APP_ENTRYPOINT");
 
-        GENERATE_RESPONSE;
+       __REQUEST_HANDLER__
+
+        return requestHandler({ entrypointModule, request });
     }
 }
 

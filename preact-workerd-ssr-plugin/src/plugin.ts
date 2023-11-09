@@ -11,12 +11,11 @@ export function preactWorkerdSSR() {
 					const handler = createWorkerdHandler({
 						entrypoint: "./entry-server.jsx",
 						server,
-						frameworkRequestHandlingJs: `
-              const url = request.url;
-              const renderedString = entryPoint.render(url);
-
-              return new Response(renderedString);
-            `,
+						requestHandler: ({ request, entrypointModule }) => {
+							const url = request.url;
+							const renderedString = (entrypointModule as any).render(url);
+							return new Response(renderedString);
+						},
 					});
 
 					server.middlewares.use(async (req, res, next) => {

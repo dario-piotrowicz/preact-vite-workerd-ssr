@@ -6,11 +6,11 @@ import workerdBootloader from "./workerdBootloader.js.txt";
 export function instantiateMiniflare({
 	entrypoint,
 	server,
-	frameworkRequestHandlingJs,
+	requestHandler,
 }: {
 	entrypoint: string;
 	server: ViteDevServer;
-	frameworkRequestHandlingJs: string;
+	requestHandler: (opts: {entrypointModule: any, request: Request}) => Response;
 }): Miniflare {
 	const viteHttpServerAddress = server.httpServer.address();
 	const viteServerAddress =
@@ -25,7 +25,16 @@ export function instantiateMiniflare({
 	const script = workerdBootloader
 		.replace(/VITE_SERVER_ADDRESS/, viteServerAddress)
 		.replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
-		.replace(/GENERATE_RESPONSE/, frameworkRequestHandlingJs);
+		.replace(/__REQUEST_HANDLER__/, () => {
+			const functionStr = requestHandler.toString();
+			if(functionStr.startsWith('requestHandler(')) {
+				// the function is defined with a method shorthand
+				return `function ${functionStr};`;
+			} else {
+				// the function is an arrow function
+				return `const requestHandler = ${functionStr};`;
+			}
+		});
 
 	// create miniflare instance
 	// load it with module loader code and import to the entry point
