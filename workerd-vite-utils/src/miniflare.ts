@@ -35,5 +35,6 @@ export function instantiateMiniflare({
 		modules: true,
 		script,
 		unsafeEvalBinding: "UNSAFE_EVAL",
+		inspectorPort: 9225,
 	});
 };
