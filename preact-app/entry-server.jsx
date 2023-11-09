@@ -2,7 +2,7 @@ import preactRender from "preact-render-to-string";
 import { h } from "preact";
 import Component from "./Component";
 
-const title = await import("./title").then((m) => m.title);
+const title = await import("./title").then((m) => m.getTitle());
 
 export function render(url) {
 	return preactRender(
