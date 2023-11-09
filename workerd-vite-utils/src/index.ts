@@ -37,7 +37,7 @@ export function createWorkerdHandler(opts: {
 		const url = new URL(`http://localhost${request.url}`);
 
 		// searchParams.get strips "+" characters which affects module resolution
-		const moduleId = url.searchParams.get("moduleId").replace(" ", "+");
+		const moduleId = url.searchParams.get("moduleId").replace(/ /g, "+");
 
 		const moduleCode = (
 			await server.transformRequest(moduleId, {
