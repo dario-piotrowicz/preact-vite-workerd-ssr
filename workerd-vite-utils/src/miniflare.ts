@@ -10,7 +10,10 @@ export function instantiateMiniflare({
 }: {
 	entrypoint: string;
 	server: ViteDevServer;
-	requestHandler: (opts: {entrypointModule: any, request: Request}) => Response;
+	requestHandler: (opts: {
+		entrypointModule: any;
+		request: Request;
+	}) => Response | Promise<Response>;
 }): Miniflare {
 	const viteHttpServerAddress = server.httpServer.address();
 	const viteServerAddress =
@@ -20,14 +23,14 @@ export function instantiateMiniflare({
 					/:/.test(viteHttpServerAddress.address)
 						? "localhost"
 						: viteHttpServerAddress.address
-				}:${viteHttpServerAddress.port}`;
+			  }:${viteHttpServerAddress.port}`;
 
 	const script = workerdBootloader
 		.replace(/VITE_SERVER_ADDRESS/, viteServerAddress)
 		.replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
 		.replace(/__REQUEST_HANDLER__/, () => {
 			const functionStr = requestHandler.toString();
-			if(functionStr.startsWith('requestHandler(')) {
+			if (functionStr.startsWith("requestHandler(")) {
 				// the function is defined with a method shorthand
 				return `function ${functionStr};`;
 			} else {
@@ -46,4 +49,4 @@ export function instantiateMiniflare({
 		unsafeEvalBinding: "UNSAFE_EVAL",
 		inspectorPort: 9225,
 	});
-};
+}

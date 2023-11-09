@@ -7,19 +7,22 @@ import type { Miniflare } from "miniflare";
 export function createWorkerdHandler(opts: {
 	entrypoint: string;
 	server: ViteDevServer;
-	requestHandler: (opts: {entrypointModule: unknown, request: Request}) => Response;
+	requestHandler: (opts: {
+		entrypointModule: any;
+		request: Request;
+	}) => Response | Promise<Response>;
 }) {
 	const { server } = opts;
 	console.log("create handler");
 
 	let mf: Miniflare | null;
 
-	if(server.httpServer.listening) {
+	if (server.httpServer.listening) {
 		mf = instantiateMiniflare(opts);
 	} else {
-		server.httpServer.once('listening', () => {
+		server.httpServer.once("listening", () => {
 			mf = instantiateMiniflare(opts);
-		})
+		});
 	}
 
 	// this could be in the future replaced with websockets
