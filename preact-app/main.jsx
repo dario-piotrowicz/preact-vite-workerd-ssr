@@ -1,8 +1,8 @@
 import { render } from "preact";
 import Component from "./Component.jsx";
-import { title } from "./title.js";
+import { getTitle } from "./title.js";
 
 render(
-	<Component url={location.pathname} title={title} />,
+	<Component url={location.pathname} title={getTitle()} />,
 	document.getElementById("app"),
 );
