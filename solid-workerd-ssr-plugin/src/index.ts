@@ -14,20 +14,35 @@ export default function (options = {}) {
 				server,
 
 				// frameworkRequestHandlingJs: `
+				//   const resp =
+
+				//   return new Response(resp);
+				// `,
+
+				// frameworkRequestHandlingJs: `
 				//   const resp = entryPoint.default();
 				//   return new Response(resp);
 				// `,
 
 				frameworkRequestHandlingJs: `
-				  const resp = await entryPoint.default({
+				  debugger;
+				  const resp = entryPoint.default({
 				    request,
-				    env: {},
-				    clientAddress: request.socket.remoteAddress,
-				    locals: {}
+            env
 				  });
 
 				  return resp;
 				`,
+
+				// frameworkRequestHandlingJs: `
+				//   debugger;
+				//   const resp = await entryPoint.default({
+				//     request,
+				//     env
+				//   });
+
+				//   return resp;
+				// `,
 			});
 
 			return async (req, res, next) => {
