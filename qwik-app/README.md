@@ -20,14 +20,7 @@ Here update the package.json in the following way:
 +    "@builder.io/qwik-city": "<YOUR_QWIK_FORK_LOCATION>/packages/qwik-city",
 ```
 
-Run the application with `pnpm dev --host`
+Run the application with `pnpm dev`
 
-> **Note**
-> Not sure why it only works with `--host` that's something to be investigated
-
-You should see something like this:
-![app partially working](./app-partially-working.png)
-
-Where the button with the green background is a qwik component with it's own on click handler (showing that qwik works to some extent).
-
-But the qwik-city context is lost, resulting in an empty page below the above mentioned component.
+You should see the standard (fully working qwik-city starting app):
+![app](./app.png)
