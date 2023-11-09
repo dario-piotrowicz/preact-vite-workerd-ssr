@@ -10,7 +10,7 @@ export function createWorkerdHandler(opts: {
 	requestHandler: (opts: {
 		entrypointModule: any;
 		request: Request;
-		context: { waitUntil: (p: Promise<unknown>) => void }
+		context: { waitUntil: (p: Promise<unknown>) => void };
 	}) => Response | Promise<Response>;
 }) {
 	const { server } = opts;
@@ -35,7 +35,11 @@ export function createWorkerdHandler(opts: {
 
 		// the request is for the workerd loader so we need to handle it
 		const url = new URL(`http://localhost${request.url}`);
-		const moduleId = url.searchParams.get("moduleId");
+
+		// searchParams.get strips "+" characters which affects module resolution
+		const moduleId = url.searchParams.get("moduleId").replace(" ", "+");
+
+		console.log("final module id: ", moduleId);
 
 		const moduleCode = (
 			await server.transformRequest(moduleId, {
