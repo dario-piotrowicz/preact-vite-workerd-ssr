@@ -7,7 +7,7 @@ import type { Miniflare } from "miniflare";
 export function createWorkerdHandler(opts: {
 	entrypoint: string;
 	server: ViteDevServer;
-	frameworkRequestHandlingJs: string;
+	requestHandler: (opts: {entrypointModule: unknown, request: Request}) => Response;
 }) {
 	const { server } = opts;
 	console.log("create handler");
