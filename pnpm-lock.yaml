@@ -61,11 +61,11 @@ importers:
   qwik-app:
     devDependencies:
       '@builder.io/qwik':
-        specifier: /Users/dario/Repos/qwik/packages/qwik
-        version: link:../../../qwik/packages/qwik
+        specifier: /Users/dario/Repos/my-repos/qwik/packages/qwik
+        version: link:../../qwik/packages/qwik
       '@builder.io/qwik-city':
-        specifier: /Users/dario/Repos/qwik/packages/qwik-city
-        version: link:../../../qwik/packages/qwik-city
+        specifier: /Users/dario/Repos/my-repos/qwik/packages/qwik-city
+        version: link:../../qwik/packages/qwik-city
       '@types/eslint':
         specifier: ^8.44.4
         version: 8.44.7
