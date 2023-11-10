@@ -45,16 +45,6 @@ export function createWorkerdHandler(opts: {
 			})
 		).code;
 
-		console.log("resolved: " + moduleId);
-		// if (/createComponent\b/.test(moduleCode)) {
-		// console.log("found `createComponent` call in: " + moduleId);
-		// debugger;
-		// }
-
-		// if (moduleId.includes("StartServer.tsx")) {
-		// 	console.log(moduleCode);
-		// }
-
 		resp.writeHead(200, { "Content-Type": "text/plain" });
 		resp.end(moduleCode);
 	});

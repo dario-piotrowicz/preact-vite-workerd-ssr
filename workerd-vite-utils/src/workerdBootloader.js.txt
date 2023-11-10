@@ -4,8 +4,6 @@ globalThis.navigator = {};
 
 export default {
 	async fetch(request, env, context) {
-		debugger;
-
 		evalBinding = env.UNSAFE_EVAL;
 
 		const entrypointModule = await __vite_ssr_dynamic_import__(
@@ -39,10 +37,7 @@ async function __vite_ssr_import__(moduleId) {
 	__ourPrivateModuleRegistry__.set(moduleId, moduleObject);
 
 	const __vite_ssr_exportAll__ = (exports, srcModule) => {
-		// console.log(exports);
-		console.log("__vite_ssr_exportAll__", Object.keys(exports));
 		Object.assign(module, exports);
-		// return { ...exports };
 	};
 	const __vite_ssr_import_meta__ = {};
 
