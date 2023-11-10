@@ -10,7 +10,7 @@ export default {
 
 		__REQUEST_HANDLER__
 
-		return requestHandler({ entrypointModule, request });
+		return requestHandler({ entrypointModule, request, context });
 	}
 }
 

@@ -13,6 +13,7 @@ export function instantiateMiniflare({
 	requestHandler: (opts: {
 		entrypointModule: any;
 		request: Request;
+		context: { waitUntil: (p: Promise<unknown>) => void }
 	}) => Response | Promise<Response>;
 }): Miniflare {
 	const viteHttpServerAddress = server.httpServer.address();

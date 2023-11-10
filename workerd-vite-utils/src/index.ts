@@ -10,6 +10,7 @@ export function createWorkerdHandler(opts: {
 	requestHandler: (opts: {
 		entrypointModule: any;
 		request: Request;
+		context: { waitUntil: (p: Promise<unknown>) => void }
 	}) => Response | Promise<Response>;
 }) {
 	const { server } = opts;
