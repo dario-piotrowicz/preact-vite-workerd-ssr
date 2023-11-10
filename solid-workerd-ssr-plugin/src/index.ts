@@ -9,15 +9,11 @@ export default function (options = {}) {
 			const handler = createWorkerdHandler({
 				entrypoint: "./src/entry-server.tsx",
 				server,
-
-				frameworkRequestHandlingJs: `
-				  const resp = entryPoint.default({
-				    request,
-            env
-				  });
-
-				  return resp;
-				`,
+				requestHandler: ({ request, entrypointModule }) => {
+					return entrypointModule.default({
+						request,
+					});
+				},
 			});
 
 			return async (req, res, next) => {
