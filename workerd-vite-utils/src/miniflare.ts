@@ -30,13 +30,19 @@ export function instantiateMiniflare({
 		.replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
 		.replace(/__REQUEST_HANDLER__/, () => {
 			const functionStr = requestHandler.toString();
-			if (functionStr.startsWith("requestHandler(")) {
-				// the function is defined with a method shorthand
-				return `function ${functionStr};`;
-			} else {
-				// the function is an arrow function
-				return `const requestHandler = ${functionStr};`;
+
+			if (
+				functionStr.startsWith("async function requestHandler(") ||
+				functionStr.startsWith("function requestHandler(")
+			) {
+				return functionStr;
 			}
+
+			if (functionStr.startsWith("requestHandler(")) {
+				return `function ${functionStr};`;
+			}
+
+			return `const requestHandler = ${functionStr};`;
 		});
 
 	// create miniflare instance
