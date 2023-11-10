@@ -26,7 +26,7 @@ async function __vite_ssr_import__(moduleId) {
 
 	if (moduleId === "seroval") {
 		moduleId =
-			"/Users/jculveyhouse/cf-repos/preact-vite-workerd-ssr/node_modules/.pnpm/node_modules/seroval";
+			"/Users/jculveyhouse/cf-repos/vite-workerd-ssr-handler-experimentation/node_modules/.pnpm/node_modules/seroval";
 	}
 
 	let moduleObject = Object.create(null);
