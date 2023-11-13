@@ -48,24 +48,24 @@ export function preactWorkerdSSR() {
 
 						template = await server.transformIndexHtml(url, template);
 
-						const { body } = await workerdFn({
-							entryPoint: "./entry-server.jsx",
-						});
+						try {
+							const { body } = await workerdFn({
+								entryPoint: "./entry-server.jsx",
+							});
 
-						if (!body) {
-							// TODO: we can add proper error handling in the workerdFn logic
+							const html = template.replace(`<!--app-html-->`, body);
+
+							res.statusCode = 200;
+
+							res.setHeader("Content-Type", "text/html");
+							res.end(html);
+						} catch (e: unknown) {
+							const errorMessage = e instanceof Error ? e.message : `${e}`;
 							res.statusCode = 500;
-							res.statusMessage = "Unexpected Error";
-							res.end("Unexpected Error");
+							res.statusMessage = errorMessage;
+							res.end(errorMessage);
 							return;
 						}
-
-						const html = template.replace(`<!--app-html-->`, body);
-
-						res.statusCode = 200;
-
-						res.setHeader("Content-Type", "text/html");
-						res.end(html);
 					} catch (e) {
 						server.ssrFixStacktrace(e);
 						next(e);

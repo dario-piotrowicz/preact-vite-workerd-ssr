@@ -90,7 +90,11 @@ export function createWorkerdViteFunction<
 		});
 
 		const resp = await mf.dispatchFetch(request);
-		const result: U = JSON.parse(await resp.text());
+		const text = await resp.text();
+		if (!resp.ok) {
+			throw new Error(text);
+		}
+		const result: U = JSON.parse(text);
 		return result;
 	};
 }
