@@ -1,24 +1,23 @@
 import fs from "node:fs";
 import path from "node:path";
 import { type ViteDevServer } from "vite";
-import { createWorkerdViteFunction } from "workerd-vite-utils";
+import { createWorkerdViteFunctions } from "workerd-vite-utils";
 
 export function preactWorkerdSSR() {
 	return {
 		name: "preact-workerd-ssr",
 		configureServer(server: ViteDevServer) {
 			return () => {
-				const workerdFn = createWorkerdViteFunction<
-					{ entryPoint: string },
-					{ body: string }
-				>({
+				const { renderApp } = createWorkerdViteFunctions({
 					server,
-					handler: async ({ data, __vite_ssr_dynamic_import__ }) => {
-						const entrypointModule = await __vite_ssr_dynamic_import__(
-							data.entryPoint,
-						);
-						const body = (entrypointModule as any).render("/");
-						return { body };
+					functions: {
+						renderApp: async ({ data, __vite_ssr_dynamic_import__ }) => {
+							const entrypointModule = await __vite_ssr_dynamic_import__(
+								(data as { entryPoint: string }).entryPoint,
+							);
+							const body = (entrypointModule as any).render("/");
+							return { body };
+						},
 					},
 				});
 
@@ -48,9 +47,9 @@ export function preactWorkerdSSR() {
 						template = await server.transformIndexHtml(url, template);
 
 						try {
-							const { body } = await workerdFn({
+							const { body } = (await renderApp({
 								entryPoint: "./entry-server.jsx",
-							});
+							})) as { body: string };
 
 							const html = template.replace(`<!--app-html-->`, body);
 

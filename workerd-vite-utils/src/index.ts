@@ -10,7 +10,17 @@ export type JSONValue =
 	| { [x: string]: JSONValue }
 	| Array<JSONValue>;
 
-export type Handler<T extends JSONValue, U extends JSONValue> = (opts: {
+type WorkerdFunction<
+	T extends JSONValue = JSONValue,
+	U extends JSONValue = JSONValue,
+> = (data: T) => Promise<U>;
+
+type WorkerdFunctions = Record<string, WorkerdFunction>;
+
+export type WorkerdFunctionImplementation<
+	T extends JSONValue,
+	U extends JSONValue,
+> = (opts: {
 	// user data (practically the fn args)
 	data: T;
 
@@ -30,14 +40,16 @@ export type Handler<T extends JSONValue, U extends JSONValue> = (opts: {
 	// __vite_ssr_import_meta__
 }) => U | Promise<U>;
 
-type WorkerdFn<T extends JSONValue, U extends JSONValue> = (
-	data: T,
-) => Promise<U>;
+export type WorkerdFunctionImplementations = Record<
+	string,
+	WorkerdFunctionImplementation<JSONValue, JSONValue>
+>;
 
-export function createWorkerdViteFunction<
-	T extends JSONValue,
-	U extends JSONValue,
->(opts: { server: ViteDevServer; handler: Handler<T, U> }): WorkerdFn<T, U> {
+// TODO: improve the WorkerdFunctionImplementations and WorkerdFunctions types (make them generic etc...)
+export function createWorkerdViteFunctions(opts: {
+	server: ViteDevServer;
+	functions: WorkerdFunctionImplementations;
+}): WorkerdFunctions {
 	const { server } = opts;
 
 	let mf: Miniflare | null;
@@ -76,25 +88,35 @@ export function createWorkerdViteFunction<
 		resp.end(moduleCode);
 	});
 
-	return async (data: JSONValue): Promise<U> => {
-		if (!mf) {
-			// this check is here as a precaution, it should never happen
-			// that at this point miniflare is not initialized!
-			throw new Error("miniflare not initialized!");
-		}
+	return Object.keys(opts.functions).reduce((acc, functionName) => {
+		return {
+			...acc,
+			[functionName]: getWorkerdFn(functionName),
+		};
+	}, {} as WorkerdFunctions);
 
-		const request = new MiniflareRequest("http://localhost", {
-			headers: {
-				__workerd_vite_runner_data__: JSON.stringify(data),
-			},
-		});
+	function getWorkerdFn(functionName: string): WorkerdFunction {
+		return async (data: JSONValue): Promise<JSONValue> => {
+			if (!mf) {
+				// this check is here as a precaution, it should never happen
+				// that at this point miniflare is not initialized!
+				throw new Error("miniflare not initialized!");
+			}
 
-		const resp = await mf.dispatchFetch(request);
-		const text = await resp.text();
-		if (!resp.ok) {
-			throw new Error(text);
-		}
-		const result: U = JSON.parse(text);
-		return result;
-	};
+			const request = new MiniflareRequest("http://localhost", {
+				headers: {
+					__workerd_vite_runner_fn_name: functionName,
+					__workerd_vite_runner_data__: JSON.stringify(data),
+				},
+			});
+
+			const resp = await mf.dispatchFetch(request);
+			const text = await resp.text();
+			if (!resp.ok) {
+				throw new Error(text);
+			}
+			const result: JSONValue = JSON.parse(text);
+			return result;
+		};
+	}
 }

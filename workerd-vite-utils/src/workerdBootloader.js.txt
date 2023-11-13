@@ -6,11 +6,12 @@ export default {
 	async fetch(req, env, ctx) {
 		evalBinding = env.UNSAFE_EVAL;
 
+		const fnName = req.headers.get('__workerd_vite_runner_fn_name');
 		const data = JSON.parse(req.headers.get('__workerd_vite_runner_data__'));
 
-		__HANDLER__
+		__FUNCTIONS__
 
-		const value = await handler({
+		const value = await functions[fnName]({
 			data,
 			req,
 			env,
