@@ -11,7 +11,7 @@
 		"esbuild": "^0.14.54",
 		"postcss": "^8.4.28",
 		"solid-workerd-ssr-plugin": "workspace:*",
-		"solid-start-cloudflare-pages": "/Users/jculveyhouse/src/solid-start/packages/start-cloudflare-pages",
+		"solid-start-cloudflare-pages": "^0.3.10",
 		"solid-start-node": "^0.3.9",
 		"typescript": "^4.9.5",
 		"vite": "^4.4.9",
@@ -21,7 +21,7 @@
 		"@solidjs/meta": "^0.29.1",
 		"@solidjs/router": "^0.8.3",
 		"solid-js": "^1.8.5",
-		"solid-start": "/Users/jculveyhouse/src/solid-start/packages/start"
+		"solid-start": "^0.3.10"
 	},
 	"engines": {
 		"node": ">=18"

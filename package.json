@@ -5,8 +5,8 @@
 	"main": "index.js",
 	"scripts": {
 		"prettify": "prettier . --write --ignore-unknown",
-		"build": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --filter preact-app --sequential build",
-		"build:watch": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --parallel build:watch",
+		"build": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --filter solid-workerd-ssr-plugin --filter preact-app --filter solid-app --sequential build",
+		"build:watch": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --filter solid-workerd-ssr-plugin --parallel build:watch",
 		"build:types": "pnpm run --filter workerd-vite-utils --filter preact-workerd-ssr-plugin --sequential build:types"
 	},
 	"keywords": [],
