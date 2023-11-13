@@ -2,3 +2,5 @@ packages:
   - "preact-app"
   - "preact-workerd-ssr-plugin"
   - "workerd-vite-utils"
+  - "solid-app"
+  - "solid-workerd-ssr-plugin"

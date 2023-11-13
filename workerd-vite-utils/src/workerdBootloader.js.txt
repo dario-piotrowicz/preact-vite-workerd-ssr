@@ -22,6 +22,11 @@ async function __vite_ssr_import__(moduleId) {
 		return __ourPrivateModuleRegistry__.get(moduleId);
 	}
 
+	if (moduleId === "seroval") {
+		moduleId =
+			"/Users/jculveyhouse/cf-repos/vite-workerd-ssr-handler-experimentation/node_modules/.pnpm/node_modules/seroval";
+	}
+
 	let moduleObject = Object.create(null);
 
 	// instead of adding the module to the registry once it has been fully initialized we
@@ -29,23 +34,25 @@ async function __vite_ssr_import__(moduleId) {
 	// we can prevent circular dependencies from generating infinite loops
 	__ourPrivateModuleRegistry__.set(moduleId, moduleObject)
 
-	// // copy from Vite's node implementation?
-	// const __vite_ssr_exportAll__ = 'something';
-	// //
-	// const __vite_ssr_import_meta__ = 'something'
+	const __vite_ssr_exportAll__ = (exports) => {
+		Object.assign(moduleObject, exports);
+	};
+	const __vite_ssr_import_meta__ = {};
 
 	// go back to Vite and request the code for the module (via transformRequest)
 	const transformed = await (await fetch(`VITE_SERVER_ADDRESS/__workerd_loader/?moduleId=${moduleId}`)).text();
 
 	const context = {
 		__vite_ssr_exports__: {},
-		// __vite_ssr_exportAll__,
-		// __vite_ssr_import_meta__,
+		__vite_ssr_exportAll__,
+		__vite_ssr_import_meta__,
 		__vite_ssr_import__,
 		__vite_ssr_dynamic_import__,
 	};
 
-	const codeDefinition = `'use strict'; return async (${Object.keys(context).join(",")})=>{`;
+	const codeDefinition = `'use strict'; return async (${Object.keys(
+		context,
+	).join(",")})=>{`;
 	const code = `
 		${codeDefinition}
 		${transformed}
@@ -56,8 +63,6 @@ async function __vite_ssr_import__(moduleId) {
 	const fn = evalBinding.newFunction(code)();
 	await fn(...Object.values(context));
 	Object.assign(moduleObject, context.__vite_ssr_exports__);
-
-	// `module` should now have all the exports registered on it now
 
 	return moduleObject;
 }
