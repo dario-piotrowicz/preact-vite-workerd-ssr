@@ -55,11 +55,11 @@ export default function (options = {}) {
 		},
 
 		start(config, { port }) {
-			throw new Error("Unimpelemented");
+			throw new Error("Unimplemented");
 		},
 
 		async build(config, builder) {
-			throw new Error("Unimpelemented");
+			throw new Error("Unimplemented");
 		},
 	};
 }
