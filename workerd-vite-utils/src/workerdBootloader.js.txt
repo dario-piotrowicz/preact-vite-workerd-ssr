@@ -3,14 +3,26 @@ let evalBinding = null;
 globalThis.navigator = {};
 
 export default {
-	async fetch(request, env, context) {
+	async fetch(req, env, ctx) {
 		evalBinding = env.UNSAFE_EVAL;
 
-		const entrypointModule = await __vite_ssr_dynamic_import__("WORKERD_APP_ENTRYPOINT");
+		const data = JSON.parse(req.headers.get('__workerd_vite_runner_data__'));
 
-		__REQUEST_HANDLER__
+		__HANDLER__
 
-		return requestHandler({ entrypointModule, request, context });
+		const value = await handler({
+			data,
+			req,
+			env,
+			ctx,
+			__vite_ssr_import__,
+			__vite_ssr_dynamic_import__,
+			// __vite_ssr_exports__,
+			// __vite_ssr_exportAll,
+			// __vite_ssr_import_meta,
+		});
+
+		return new Response(JSON.stringify(value));
 	}
 }
 

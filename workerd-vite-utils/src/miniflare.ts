@@ -2,19 +2,14 @@ import { Log, Miniflare } from "miniflare";
 import type { ViteDevServer } from "vite";
 //@ts-ignore
 import workerdBootloader from "./workerdBootloader.js.txt";
+import type { Handler, JSONValue } from "./index";
 
-export function instantiateMiniflare({
-	entrypoint,
+export function instantiateMiniflare<T extends JSONValue, U extends JSONValue>({
 	server,
-	requestHandler,
+	handler,
 }: {
-	entrypoint: string;
+	handler: Handler<T, U>;
 	server: ViteDevServer;
-	requestHandler: (opts: {
-		entrypointModule: any;
-		request: Request;
-		context: { waitUntil: (p: Promise<unknown>) => void }
-	}) => Response | Promise<Response>;
 }): Miniflare {
 	const viteHttpServerAddress = server.httpServer.address();
 	const viteServerAddress =
@@ -28,22 +23,21 @@ export function instantiateMiniflare({
 
 	const script = workerdBootloader
 		.replace(/VITE_SERVER_ADDRESS/, viteServerAddress)
-		.replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
-		.replace(/__REQUEST_HANDLER__/, () => {
-			const functionStr = requestHandler.toString();
+		.replace(/__HANDLER__/, () => {
+			const functionStr = handler.toString();
 
 			if (
-				functionStr.startsWith("async function requestHandler(") ||
-				functionStr.startsWith("function requestHandler(")
+				functionStr.startsWith("async function handler(") ||
+				functionStr.startsWith("function handler(")
 			) {
 				return functionStr;
 			}
 
-			if (functionStr.startsWith("requestHandler(")) {
+			if (functionStr.startsWith("handler(")) {
 				return `function ${functionStr};`;
 			}
 
-			return `const requestHandler = ${functionStr};`;
+			return `const handler = ${functionStr};`;
 		});
 
 	// create miniflare instance

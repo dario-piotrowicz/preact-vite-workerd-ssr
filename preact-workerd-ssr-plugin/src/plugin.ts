@@ -1,20 +1,25 @@
+import { Response } from "miniflare";
 import fs from "node:fs";
 import path from "node:path";
 import { type ViteDevServer } from "vite";
-import { createWorkerdHandler } from "workerd-vite-utils";
+import { createWorkerdViteFunction } from "workerd-vite-utils";
 
 export function preactWorkerdSSR() {
 	return {
 		name: "preact-workerd-ssr",
 		configureServer(server: ViteDevServer) {
 			return () => {
-				const handler = createWorkerdHandler({
-					entrypoint: "./entry-server.jsx",
+				const workerdFn = createWorkerdViteFunction<
+					{ entryPoint: string },
+					{ body: string }
+				>({
 					server,
-					requestHandler: ({ request, entrypointModule }) => {
-						const url = request.url;
-						const renderedString = (entrypointModule as any).render(url);
-						return new Response(renderedString);
+					handler: async ({ data, __vite_ssr_dynamic_import__ }) => {
+						const entrypointModule = await __vite_ssr_dynamic_import__(
+							data.entryPoint,
+						);
+						const body = (entrypointModule as any).render("/");
+						return { body };
 					},
 				});
 
@@ -43,16 +48,18 @@ export function preactWorkerdSSR() {
 
 						template = await server.transformIndexHtml(url, template);
 
-						const ssrResponse = await handler(req);
+						const { body } = await workerdFn({
+							entryPoint: "./entry-server.jsx",
+						});
 
-						if (ssrResponse.status !== 200) {
-							res.statusCode = ssrResponse.status;
-							res.statusMessage = ssrResponse.statusText;
-							res.end(await ssrResponse.text());
+						if (!body) {
+							// TODO: we can add proper error handling in the workerdFn logic
+							res.statusCode = 500;
+							res.statusMessage = "Unexpected Error";
+							res.end("Unexpected Error");
 							return;
 						}
 
-						const body = await ssrResponse.text();
 						const html = template.replace(`<!--app-html-->`, body);
 
 						res.statusCode = 200;
