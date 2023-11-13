@@ -1,15 +1,15 @@
 import { component$ } from "@builder.io/qwik";
 import styles from "./hero.module.css";
 import ImgThunder from "~/media/thunder.png?jsx";
+import { useTestLoader } from "~/routes/layout";
 
 export default component$(() => {
+  const testSignal = useTestLoader();
   return (
     <div class={["container", styles.hero]}>
       <ImgThunder class={styles["hero-image"]} />
       <h1>
-        So <span class="highlight">fantastic</span>
-        <br />
-        to have <span class="highlight">you</span> here
+        {testSignal.value}
       </h1>
       <p>Have fun building your App with Qwik.</p>
       <div class={styles["button-group"]}>

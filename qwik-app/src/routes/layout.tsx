@@ -7,6 +7,12 @@ import Footer from "~/components/starter/footer/footer";
 
 import styles from "./styles.css?inline";
 
+export const useTestLoader = routeLoader$(async ({ platform }) => {
+  return !platform.env
+    ? 'ENV IS NOT DEFINED'
+    : 'ENV KEYS: ' + Object.keys(platform.env ?? {}).join(', ');
+});
+
 export const onGet: RequestHandler = async ({ cacheControl }) => {
   // Control caching for this request for best performance and to reduce hosting costs:
   // https://qwik.builder.io/docs/caching/
