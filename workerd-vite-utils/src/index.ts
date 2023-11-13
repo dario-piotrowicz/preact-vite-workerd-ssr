@@ -29,15 +29,7 @@ export type WorkerdFunctionImplementation<
 	env: Record<string, unknown>;
 	ctx: { waitUntil: (p: Promise<unknown>) => void };
 
-	// vite modules resolution functions
-	// Note: we do want to provide this to the handler so that users aren't forced
-	//       to ts-ignore such imports
-	__vite_ssr_import__: (moduleId: string) => Promise<unknown>;
-	__vite_ssr_dynamic_import__: (moduleId: string) => Promise<unknown>;
-	// TODO: fill the types here
-	// __vite_ssr_exports__: any;
-	// __vite_ssr_exportAll__: any;
-	// __vite_ssr_import_meta__: any;
+	viteImport: (moduleId: string) => Promise<unknown>;
 }) => U | Promise<U>;
 
 export type WorkerdFunctionImplementations = Record<

@@ -11,8 +11,8 @@ export function preactWorkerdSSR() {
 				const { renderApp } = createWorkerdViteFunctions({
 					server,
 					functions: {
-						renderApp: async ({ data, __vite_ssr_dynamic_import__ }) => {
-							const entrypointModule = await __vite_ssr_dynamic_import__(
+						renderApp: async ({ data, viteImport }) => {
+							const entrypointModule = await viteImport(
 								(data as { entryPoint: string }).entryPoint,
 							);
 							const body = (entrypointModule as any).render("/");

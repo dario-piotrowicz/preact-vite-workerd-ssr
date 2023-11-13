@@ -16,11 +16,7 @@ export default {
 			req,
 			env,
 			ctx,
-			__vite_ssr_import__,
-			__vite_ssr_dynamic_import__,
-			// __vite_ssr_exports__,
-			// __vite_ssr_exportAll,
-			// __vite_ssr_import_meta,
+			viteImport: __vite_ssr_import__,
 		});
 
 		return new Response(JSON.stringify(value));

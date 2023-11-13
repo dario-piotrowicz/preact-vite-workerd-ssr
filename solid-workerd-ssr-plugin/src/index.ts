@@ -9,12 +9,8 @@ export default function (options = {}) {
 			const { renderApp } = createWorkerdViteFunctions({
 				server,
 				functions: {
-					renderApp: async ({
-						data,
-						req: request,
-						__vite_ssr_dynamic_import__,
-					}) => {
-						const entrypointModule = await __vite_ssr_dynamic_import__(
+					renderApp: async ({ data, req: request, viteImport }) => {
+						const entrypointModule = await viteImport(
 							(data as { entryPoint: string }).entryPoint,
 						);
 						const resp = await (entrypointModule as any).default({ request });
