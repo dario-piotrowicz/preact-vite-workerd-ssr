@@ -21,7 +21,7 @@ export default function (options = {}) {
 					// the request is not for the root nor the workerd loader, so
 					// it's not for us to handle
 
-					// NOTE: this works fine with preact, but in general we want to handle all
+					// NOTE: this works fine with solid, but in general we want to handle all
 					// incoming requests, we need to find a way to discern which requests we need
 					// to handle and which we don't (for example we never want to intercept static
 					// asset requests!)
