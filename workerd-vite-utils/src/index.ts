@@ -15,7 +15,7 @@ type WorkerdFunction<
 	U extends JSONValue = JSONValue,
 > = (data: T) => Promise<U>;
 
-type WorkerdFunctions = Record<string, WorkerdFunction>;
+export type WorkerdFunctions = Record<string, WorkerdFunction>;
 
 export type WorkerdFunctionImplementation<
 	T extends JSONValue,
