@@ -83,8 +83,6 @@ export function createWorkerdViteFunctions(opts: {
 
 		resp.writeHead(200, { "Content-Type": "text/plain" });
 
-		// console.log(`\x1b[46mresult:\n\n${moduleCode}\n\n\x1b[0m`);
-
 		resp.end(moduleCode);
 	});
 
