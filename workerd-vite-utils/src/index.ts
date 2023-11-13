@@ -35,9 +35,9 @@ export type WorkerdFunctionImplementation<
 	__vite_ssr_import__: (moduleId: string) => Promise<unknown>;
 	__vite_ssr_dynamic_import__: (moduleId: string) => Promise<unknown>;
 	// TODO: fill the types here
-	// __vite_ssr_exports__
-	// __vite_ssr_exportAll__
-	// __vite_ssr_import_meta__
+	// __vite_ssr_exports__: any;
+	// __vite_ssr_exportAll__: any;
+	// __vite_ssr_import_meta__: any;
 }) => U | Promise<U>;
 
 export type WorkerdFunctionImplementations = Record<

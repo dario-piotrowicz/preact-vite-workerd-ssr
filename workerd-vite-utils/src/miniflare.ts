@@ -65,6 +65,14 @@ export function instantiateMiniflare({
 	// create miniflare instance
 	// load it with module loader code and import to the entry point
 
+	console.log(`\x1b[31m script
+			
+			
+			${script}
+			
+			
+			\x1b[0m`);
+
 	return new Miniflare({
 		log: new Log(),
 		modules: true,
