@@ -1,20 +1,23 @@
 import fs from "node:fs";
 import path from "node:path";
 import { type ViteDevServer } from "vite";
-import { createWorkerdHandler } from "workerd-vite-utils";
+import { createWorkerdViteFunctions } from "workerd-vite-utils";
 
 export function preactWorkerdSSR() {
 	return {
 		name: "preact-workerd-ssr",
 		configureServer(server: ViteDevServer) {
 			return () => {
-				const handler = createWorkerdHandler({
-					entrypoint: "./entry-server.jsx",
+				const { renderApp } = createWorkerdViteFunctions({
 					server,
-					requestHandler: ({ request, entrypointModule }) => {
-						const url = request.url;
-						const renderedString = (entrypointModule as any).render(url);
-						return new Response(renderedString);
+					functions: {
+						renderApp: async ({ data, viteImport }) => {
+							const entrypointModule = await viteImport(
+								(data as { entryPoint: string }).entryPoint,
+							);
+							const body = (entrypointModule as any).render("/");
+							return { body };
+						},
 					},
 				});
 
@@ -43,22 +46,24 @@ export function preactWorkerdSSR() {
 
 						template = await server.transformIndexHtml(url, template);
 
-						const ssrResponse = await handler(req);
+						try {
+							const { body } = (await renderApp({
+								entryPoint: "./entry-server.jsx",
+							})) as { body: string };
 
-						if (ssrResponse.status !== 200) {
-							res.statusCode = ssrResponse.status;
-							res.statusMessage = ssrResponse.statusText;
-							res.end(await ssrResponse.text());
+							const html = template.replace(`<!--app-html-->`, body);
+
+							res.statusCode = 200;
+
+							res.setHeader("Content-Type", "text/html");
+							res.end(html);
+						} catch (e: unknown) {
+							const errorMessage = e instanceof Error ? e.message : `${e}`;
+							res.statusCode = 500;
+							res.statusMessage = errorMessage;
+							res.end(errorMessage);
 							return;
 						}
-
-						const body = await ssrResponse.text();
-						const html = template.replace(`<!--app-html-->`, body);
-
-						res.statusCode = 200;
-
-						res.setHeader("Content-Type", "text/html");
-						res.end(html);
 					} catch (e) {
 						server.ssrFixStacktrace(e);
 						next(e);

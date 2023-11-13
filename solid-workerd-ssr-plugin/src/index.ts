@@ -1,4 +1,4 @@
-import { createWorkerdHandler } from "workerd-vite-utils";
+import { createWorkerdViteFunctions } from "workerd-vite-utils";
 
 export default function (options = {}) {
 	return {
@@ -6,13 +6,17 @@ export default function (options = {}) {
 		async dev(options, vite, dev) {
 			const server = vite;
 
-			const handler = createWorkerdHandler({
-				entrypoint: "./src/entry-server.tsx",
+			const { renderApp } = createWorkerdViteFunctions({
 				server,
-				requestHandler: ({ request, entrypointModule }) => {
-					return entrypointModule.default({
-						request,
-					});
+				functions: {
+					renderApp: async ({ data, req: request, viteImport }) => {
+						const entrypointModule = await viteImport(
+							(data as { entryPoint: string }).entryPoint,
+						);
+						const resp = await (entrypointModule as any).default({ request });
+						const html = await resp.text();
+						return { html };
+					},
 				},
 			});
 
@@ -29,22 +33,14 @@ export default function (options = {}) {
 					return;
 				}
 
-				const url = req.originalUrl;
-
 				try {
-					const ssrResponse = await handler(req);
+					const { html } = (await renderApp({
+						entryPoint: "./src/entry-server.tsx",
+					})) as { html: string };
 
-					if (ssrResponse.status !== 200) {
-						res.statusCode = ssrResponse.status;
-						res.statusMessage = ssrResponse.statusText;
-						res.end(await ssrResponse.text());
-						return;
-					}
-
-					const body = await ssrResponse.text();
 					res.statusCode = 200;
 					res.setHeader("Content-Type", "text/html");
-					res.end(body);
+					res.end(html);
 				} catch (e) {
 					server.ssrFixStacktrace(e);
 					next(e);

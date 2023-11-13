@@ -2,19 +2,14 @@ import { Log, Miniflare } from "miniflare";
 import type { ViteDevServer } from "vite";
 //@ts-ignore
 import workerdBootloader from "./workerdBootloader.js.txt";
+import type { WorkerdFunctionImplementations } from "./index";
 
 export function instantiateMiniflare({
-	entrypoint,
 	server,
-	requestHandler,
+	functions,
 }: {
-	entrypoint: string;
+	functions: WorkerdFunctionImplementations;
 	server: ViteDevServer;
-	requestHandler: (opts: {
-		entrypointModule: any;
-		request: Request;
-		context: { waitUntil: (p: Promise<unknown>) => void }
-	}) => Response | Promise<Response>;
 }): Miniflare {
 	const viteHttpServerAddress = server.httpServer.address();
 	const viteServerAddress =
@@ -28,22 +23,43 @@ export function instantiateMiniflare({
 
 	const script = workerdBootloader
 		.replace(/VITE_SERVER_ADDRESS/, viteServerAddress)
-		.replace(/WORKERD_APP_ENTRYPOINT/, entrypoint)
-		.replace(/__REQUEST_HANDLER__/, () => {
-			const functionStr = requestHandler.toString();
+		.replace(/__FUNCTIONS__/, () => {
+			const result = [
+				"const functions = {};",
+				...Object.entries(functions).map(([functionName, functionImpl]) => {
+					const functionStr = functionImpl.toString();
 
-			if (
-				functionStr.startsWith("async function requestHandler(") ||
-				functionStr.startsWith("function requestHandler(")
-			) {
-				return functionStr;
-			}
+					if (
+						// TODO: here we make the assumption that if the user provides named functions
+						// those match the functionName provided, this is not really necessary and we
+						// can handle functions named anything, let implement that later
+						functionStr.startsWith(`async function ${functionName}(`) ||
+						functionStr.startsWith(`function ${functionName}(`)
+					) {
+						return `
+							${functionStr}
 
-			if (functionStr.startsWith("requestHandler(")) {
-				return `function ${functionStr};`;
-			}
+							functions["${functionName}"] = ${functionName};
+						`;
+					}
 
-			return `const requestHandler = ${functionStr};`;
+					// TODO: here we make the assumption that if the user provides named functions
+					// those match the functionName provided, this is not really necessary and we
+					// can handle functions named anything, let implement that later
+					if (functionStr.startsWith(`${functionName}(`)) {
+						return `
+							function ${functionStr};
+
+							functions["${functionName}"] = ${functionName};
+						`;
+					}
+
+					return `
+						functions["${functionName}"] = ${functionStr};
+					`;
+				}),
+			].join("\n");
+			return `\n\n${result}\n\n`;
 		});
 
 	// create miniflare instance

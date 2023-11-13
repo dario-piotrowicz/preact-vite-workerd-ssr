@@ -4,5 +4,5 @@ import { defineConfig } from "vite";
 import cloudflare from "solid-workerd-ssr-plugin"; // new adapter
 
 export default defineConfig({
-	plugins: [solid({ adapter: cloudflare({}) })],
+  plugins: [solid({ adapter: cloudflare({}) })],
 });

@@ -1,20 +1,48 @@
-import { IncomingMessage } from "http";
 import { ViteDevServer } from "vite";
 import { instantiateMiniflare } from "./miniflare.js";
 
-import type { Miniflare } from "miniflare";
+import { Miniflare, Request as MiniflareRequest } from "miniflare";
 
-export function createWorkerdHandler(opts: {
-	entrypoint: string;
+export type JSONValue =
+	| string
+	| number
+	| boolean
+	| { [x: string]: JSONValue }
+	| Array<JSONValue>;
+
+type WorkerdFunction<
+	T extends JSONValue = JSONValue,
+	U extends JSONValue = JSONValue,
+> = (data: T) => Promise<U>;
+
+type WorkerdFunctions = Record<string, WorkerdFunction>;
+
+export type WorkerdFunctionImplementation<
+	T extends JSONValue,
+	U extends JSONValue,
+> = (opts: {
+	// user data (practically the fn args)
+	data: T;
+
+	// miniflare/workerd values
+	req: MiniflareRequest;
+	env: Record<string, unknown>;
+	ctx: { waitUntil: (p: Promise<unknown>) => void };
+
+	viteImport: (moduleId: string) => Promise<unknown>;
+}) => U | Promise<U>;
+
+export type WorkerdFunctionImplementations = Record<
+	string,
+	WorkerdFunctionImplementation<JSONValue, JSONValue>
+>;
+
+// TODO: improve the WorkerdFunctionImplementations and WorkerdFunctions types (make them generic etc...)
+export function createWorkerdViteFunctions(opts: {
 	server: ViteDevServer;
-	requestHandler: (opts: {
-		entrypointModule: any;
-		request: Request;
-		context: { waitUntil: (p: Promise<unknown>) => void };
-	}) => Response | Promise<Response>;
-}) {
+	functions: WorkerdFunctionImplementations;
+}): WorkerdFunctions {
 	const { server } = opts;
-	console.log("create handler");
 
 	let mf: Miniflare | null;
 
@@ -46,26 +74,39 @@ export function createWorkerdHandler(opts: {
 		).code;
 
 		resp.writeHead(200, { "Content-Type": "text/plain" });
+
 		resp.end(moduleCode);
 	});
 
-	return async function workerdRequestHandler(request: IncomingMessage) {
-		let url = request.url.startsWith("/")
-			? `http://localhost${request.url}`
-			: request.url;
+	return Object.keys(opts.functions).reduce((acc, functionName) => {
+		return {
+			...acc,
+			[functionName]: getWorkerdFn(functionName),
+		};
+	}, {} as WorkerdFunctions);
 
-		if (!mf) {
-			// this check is here as a precaution, it should never happen
-			// that at this point miniflare is not initialized!
-			throw new Error("miniflare not initialized!");
-		}
+	function getWorkerdFn(functionName: string): WorkerdFunction {
+		return async (data: JSONValue): Promise<JSONValue> => {
+			if (!mf) {
+				// this check is here as a precaution, it should never happen
+				// that at this point miniflare is not initialized!
+				throw new Error("miniflare not initialized!");
+			}
 
-		// TODO: we should support POST requests with body as well
-		//       for that we need something along the lines of
-		//       https://github.com/sveltejs/kit/blob/master/packages/kit/src/exports/node/index.js#L8
-		return mf.dispatchFetch(url, {
-			headers: request.headers,
-			method: request.method || "GET",
-		});
-	};
+			const request = new MiniflareRequest("http://localhost", {
+				headers: {
+					__workerd_vite_runner_fn_name: functionName,
+					__workerd_vite_runner_data__: JSON.stringify(data),
+				},
+			});
+
+			const resp = await mf.dispatchFetch(request);
+			const text = await resp.text();
+			if (!resp.ok) {
+				throw new Error(text);
+			}
+			const result: JSONValue = JSON.parse(text);
+			return result;
+		};
+	}
 }
