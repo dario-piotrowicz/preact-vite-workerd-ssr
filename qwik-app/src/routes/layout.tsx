@@ -7,10 +7,17 @@ import Footer from "~/components/starter/footer/footer";
 
 import styles from "./styles.css?inline";
 
-export const useTestLoader = routeLoader$(async ({ platform }) => {
-  return !platform.env
-    ? 'ENV IS NOT DEFINED'
-    : 'ENV KEYS: ' + Object.keys(platform.env ?? {}).join(', ');
+export const useShowEnvEntriesLoader = routeLoader$(async ({ platform }) => {
+  if(!platform.env) {
+    return 'platform.env is not defined!!!';
+  }
+
+  try {
+    const platformEnvStr = JSON.stringify(platform.env);
+    return `platform.env: ${platformEnvStr}`;
+  } catch {
+    return "platform.env can't be stringified";
+  }
 });
 
 export const onGet: RequestHandler = async ({ cacheControl }) => {
