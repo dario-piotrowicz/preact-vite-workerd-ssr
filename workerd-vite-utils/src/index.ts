@@ -68,7 +68,7 @@ export function createWorkerdViteFunctions(opts: {
 		let moduleId = url.searchParams.get("moduleId").replace(/ /g, "+");
 		if(moduleId==='zod'){
 		  // temporary hack, we need to figure out node_modules resolution!
-		  moduleId = '/Users/dario/Repos/qwik/node_modules/.pnpm/zod@3.22.4/node_modules/zod/lib/index.mjs';
+		  moduleId = '/Users/dario/Repos/my-repos/qwik/node_modules/.pnpm/zod@3.22.4/node_modules/zod/lib/index.mjs';
 		}
 
 		console.log(
