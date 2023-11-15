@@ -10,7 +10,7 @@ export type JSONValue =
 	| { [x: string]: JSONValue }
 	| Array<JSONValue>;
 
-type WorkerdFunction<
+export type WorkerdFunction<
 	T extends JSONValue = JSONValue,
 	U extends JSONValue = JSONValue,
 > = (data: T) => Promise<U>;
