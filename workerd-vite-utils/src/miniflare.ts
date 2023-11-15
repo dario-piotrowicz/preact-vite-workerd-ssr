@@ -68,6 +68,10 @@ export function instantiateMiniflare({
 	return new Miniflare({
 		log: new Log(),
 		modules: true,
+		bindings: {
+			TEST: "TEST",
+		},
+		kvNamespaces: { TEST_NAMESPACE: "test_namespace" },
 		script,
 		unsafeEvalBinding: "UNSAFE_EVAL",
 		inspectorPort: 9225,

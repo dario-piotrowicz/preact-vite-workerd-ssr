@@ -4,16 +4,20 @@ export default function (options = {}) {
 	return {
 		name: "cloudflare-pages",
 		async dev(options, vite, dev) {
+			debugger;
 			const server = vite;
 
 			const { renderApp } = createWorkerdViteFunctions({
 				server,
 				functions: {
-					renderApp: async ({ data, req: request, viteImport }) => {
+					renderApp: async ({ data, env, req: request, viteImport }) => {
 						const entrypointModule = await viteImport(
 							(data as { entryPoint: string }).entryPoint,
 						);
-						const resp = await (entrypointModule as any).default({ request });
+						const resp = await (entrypointModule as any).default({
+							request,
+							env,
+						});
 						const html = await resp.text();
 						return { html };
 					},
