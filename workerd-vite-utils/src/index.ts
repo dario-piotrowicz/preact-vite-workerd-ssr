@@ -10,7 +10,7 @@ export type JSONValue =
 	| { [x: string]: JSONValue }
 	| Array<JSONValue>;
 
-type WorkerdFunction<
+export type WorkerdFunction<
 	T extends JSONValue = JSONValue,
 	U extends JSONValue = JSONValue,
 > = (data: T) => Promise<U>;
@@ -65,7 +65,15 @@ export function createWorkerdViteFunctions(opts: {
 		const url = new URL(`http://localhost${request.url}`);
 
 		// searchParams.get strips "+" characters which affects module resolution
-		const moduleId = url.searchParams.get("moduleId").replace(/ /g, "+");
+		let moduleId = url.searchParams.get("moduleId").replace(/ /g, "+");
+		if(moduleId==='zod'){
+		  // temporary hack, we need to figure out node_modules resolution!
+		  moduleId = '/Users/dario/Repos/my-repos/qwik/node_modules/.pnpm/zod@3.22.4/node_modules/zod/lib/index.mjs';
+		}
+
+		console.log(
+			`\x1b[44m [workerd loader] handling request for module ${moduleId} \x1b[0m`,
+		);
 
 		const moduleCode = (
 			await server.transformRequest(moduleId, {
@@ -74,7 +82,6 @@ export function createWorkerdViteFunctions(opts: {
 		).code;
 
 		resp.writeHead(200, { "Content-Type": "text/plain" });
-
 		resp.end(moduleCode);
 	});
 

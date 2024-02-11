@@ -75,5 +75,6 @@ export function instantiateMiniflare({
 		script,
 		unsafeEvalBinding: "UNSAFE_EVAL",
 		inspectorPort: 9225,
+		kvNamespaces: ['MY_TESTING_KV']
 	});
 }
